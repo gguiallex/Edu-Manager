@@ -7,9 +7,9 @@ export default function NotFound() {
                 Página 404 não encontrada!
             </h1>
             
-            <p>Essa página que tentou acessar não existe!</p>
+            <p className="mt-5 mb-7">Essa página que tentou acessar não existe!</p>
             
-            <Link href='/'>
+            <Link href='/' className="cursor-pointer m-9">
                 Voltar para home
             </Link>
         </div>

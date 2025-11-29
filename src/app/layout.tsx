@@ -1,5 +1,5 @@
-//import type { Metadata } from "next";
 //import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from "next";
 import { Footer } from "../components/footer";
 import { Header } from "../components/header";
 import "./globals.css";
@@ -12,12 +12,12 @@ import "./globals.css";
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-});
+});*/
 
 export const metadata: Metadata = {
   title: "Edu Manager",
   description: "Projeto utilizando React com Next.js e TypeScript",
-};*/
+};
 
 //className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 
