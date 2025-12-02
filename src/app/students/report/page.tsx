@@ -1,3 +1,5 @@
+import { HeaderAluno } from "@/src/components/header";
+
 export default function ReportPage() {
   const boletim = [
     { materia: "Matemática", media: 8.2 },
@@ -8,6 +10,9 @@ export default function ReportPage() {
 
   return (
     <div className="p-8">
+
+      <HeaderAluno/>
+      <div className="mt-11">
       <h1 className="text-3xl font-bold">Boletim</h1>
 
       <table className="mt-8 w-full border-collapse">
@@ -27,6 +32,7 @@ export default function ReportPage() {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }

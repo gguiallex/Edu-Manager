@@ -1,3 +1,5 @@
+import { HeaderAluno } from "@/src/components/header";
+
 interface Props {
   params: { id: string };
 }
@@ -7,6 +9,9 @@ export default function SubjectDetails({ params }: Props) {
 
   return (
     <div className="p-8">
+
+      <HeaderAluno/>
+
       <h1 className="text-3xl font-bold capitalize">{id}</h1>
 
       <section className="mt-6">

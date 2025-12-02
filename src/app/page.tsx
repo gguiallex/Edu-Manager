@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { Header } from "../components/header";
 
 export const metadata: Metadata = {
   title: "Edu Manager - Início",
@@ -9,6 +10,8 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center px-6">
+
+    <Header/>
 
       {/* Seção principal */}
       <section className="text-center py-10 rounded-xl shadow-md w-full max-w-4xl mt-10">
