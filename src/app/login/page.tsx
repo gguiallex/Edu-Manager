@@ -14,18 +14,29 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  setError("");
 
-    // Simulação de erro (remova depois)
-    if (username !== "teste" || password !== "123") {
-      setError("Usuário ou senha incorretos. Tente novamente.");
-      return;
-    }
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
 
-    // Redirecionar após login correto
-    //router.push("/dashboard");
+  const data = await res.json();
+
+  if (!res.ok) {
+    setError(data.error || "Erro ao fazer login");
+    return;
   }
+
+  //salvar o usuário no localStorage
+  localStorage.setItem("user", JSON.stringify(data.user));
+
+  // Redirecionar:
+  window.location.href = "/students"; // ou /teachers, /manager, etc.
+}
 
   return (
     <div className="flex items-center mt-8 justify-center min-h-[85vh] px-4">

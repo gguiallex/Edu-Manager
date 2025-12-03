@@ -12,18 +12,23 @@ export function Header() {
                     <ul className="flex items-center justify-center gap-2">
                         <li>
                             <Link href='/'>
-                                Home                            
+                                Home
                             </Link>
 
                         </li>
                         <li>
                             <Link href='/students'>
-                                Boletim
+                                Estudantes
                             </Link>
                         </li>
                         <li>
-                            <Link href='/agosto'>
-                                Perfil
+                            <Link href='/teacher'>
+                                Professores
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href='/manager'>
+                                Gestores
                             </Link>
                         </li>
                     </ul>
@@ -45,7 +50,7 @@ export function HeaderAluno() {
                     <ul className="flex items-center justify-center gap-2">
                         <li>
                             <Link href='/students'>
-                                Início                            
+                                Início
                             </Link>
 
                         </li>
@@ -66,9 +71,9 @@ export function HeaderAluno() {
                         </li>
 
                         <li>
-                        <Link href='/'>
-                            Deslogar
-                        </Link>
+                            <Link href='/'>
+                                Deslogar
+                            </Link>
                         </li>
                     </ul>
                 </nav>
@@ -89,7 +94,7 @@ export function HeaderProfessor() {
                     <ul className="flex items-center justify-center gap-2">
                         <li>
                             <Link href='/teacher'>
-                                Início                           
+                                Início
                             </Link>
 
                         </li>
@@ -101,6 +106,50 @@ export function HeaderProfessor() {
                         <li>
                             <Link href='/agosto'>
                                 Perfil
+                            </Link>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+    );
+}
+
+export function HeaderGestor() {
+    return (
+        <header className="fixed top-0 left-0 w-full z-50 flex px-2 py-4 bg-zinc-900 text-white">
+            <div className="flex items-center justify-between w-full mx-auto max-w-7xl">
+                <div>
+                    Edu Manager
+                </div>
+
+                <nav>
+                    <ul className="flex items-center justify-center gap-2">
+                        <li>
+                            <Link href='/manager'>
+                                Início
+                            </Link>
+
+                        </li>
+                        <li>
+                            <Link href='/manager/requests'>
+                                Solicitações
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href='/manager/users'>
+                                Usuários
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href='/manager/classes'>
+                                Turmas
+                            </Link>
+                        </li>
+
+                        <li>
+                            <Link href='/'>
+                                Deslogar
                             </Link>
                         </li>
                     </ul>
