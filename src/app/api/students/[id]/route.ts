@@ -12,7 +12,7 @@ import { db } from "@/lib/db";
  * Esse endpoint consolida as consultas necessárias para montar o boletim do aluno.
  */
 export async function GET(_: any, { params }: any) {
-  const studentId = params.id;
+  const { id: studentId } = await params;
   try {
     // 1) Perfil do usuário + dados da tabela students + turma
     const [profileRows]: any = await db.query(
@@ -99,7 +99,7 @@ export async function GET(_: any, { params }: any) {
  * Atualiza a tabela users e students.
  */
 export async function PUT(req: Request, { params }: any) {
-  const studentId = params.id;
+  const { id: studentId } = await params;
   try {
     const { name, email, responsible, responsible_phone } = await req.json();
 
@@ -127,7 +127,7 @@ export async function PUT(req: Request, { params }: any) {
  * Remove o aluno do sistema (deleta users -> ON DELETE CASCADE remove students e student_class se FK configurada).
  */
 export async function DELETE(_: any, { params }: any) {
-  const studentId = params.id;
+  const { id: studentId } = await params;
   try {
     await db.query("DELETE FROM users WHERE id = ?", [studentId]);
     return NextResponse.json({ success: true, message: "Aluno removido" });

@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
  * Retorna perfil completo do professor + turmas + matérias
  */
 export async function GET(_: any, { params }: any) {
-  const teacherId = params.id;
+  const { id: teacherId } = await params;
 
   try {
     const [profile]: any = await db.query(
@@ -62,7 +62,7 @@ export async function GET(_: any, { params }: any) {
  * Atualiza dados do professor (users + teachers)
  */
 export async function PUT(req: Request, { params }: any) {
-  const teacherId = params.id;
+  const { id: teacherId } = await params;
 
   try {
     const { name, email, degree, experience } = await req.json();
@@ -93,7 +93,7 @@ export async function PUT(req: Request, { params }: any) {
  * Deleta o professor do sistema (deleta users → cascata para teachers).
  */
 export async function DELETE(_: any, { params }: any) {
-  const teacherId = params.id;
+  const { id: teacherId } = await params;
 
   try {
     await db.query("DELETE FROM users WHERE id = ?", [teacherId]);

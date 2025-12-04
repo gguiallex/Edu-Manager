@@ -5,10 +5,16 @@ import { db } from "@/lib/db";
 /**
  * GET /api/teacherSubjectClass
  * Retorna todas as combinações professor ↔ matéria ↔ turma
+ * 
+ * Query params:
+ * - class_id: Filtrar por turma (opcional)
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const [rows]: any = await db.query(`
+    const url = new URL(req.url);
+    const classId = url.searchParams.get("class_id");
+
+    let query = `
       SELECT 
         tsc.id AS link_id,
         u.name AS teacher_name,
@@ -21,8 +27,18 @@ export async function GET() {
       JOIN users u ON u.id = tsc.teacher_id
       LEFT JOIN subjects sub ON sub.id = tsc.subject_id
       LEFT JOIN classes c ON c.id = tsc.class_id
-      ORDER BY c.name, sub.name
-    `);
+    `;
+
+    let params: any[] = [];
+
+    if (classId) {
+      query += ` WHERE tsc.class_id = ?`;
+      params.push(classId);
+    }
+
+    query += ` ORDER BY c.name, sub.name`;
+
+    const [rows]: any = await db.query(query, params);
 
     return NextResponse.json(rows);
   } catch (e: any) {
