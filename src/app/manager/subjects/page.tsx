@@ -1,134 +1,136 @@
 "use client";
 
 import { HeaderGestor } from "@/components/header";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
-interface Class {
+interface Subject {
   id: number;
   name: string;
-  year: number;
 }
 
-export default function ClassesPage() {
-  const [classesList, setClasses] = useState<Class[]>([]);
-  const [name, setName] = useState("");
-  const [year, setYear] = useState("");
+export default function SubjectsManager() {
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [name, setName] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
-  const [editYear, setEditYear] = useState("");
 
-  async function loadClasses() {
+  async function loadSubjects() {
     try {
-      const res = await fetch("/api/classes");
+      const res = await fetch("/api/subjects");
       const data = await res.json();
-      setClasses(Array.isArray(data) ? data : []);
+      setSubjects(Array.isArray(data) ? data : []);
     } catch (err) {
-      setMessage("Erro ao carregar turmas");
+      setMessage("Erro ao carregar matérias");
+      console.error(err);
     }
   }
 
-  async function createClass() {
-    if (!name || !year) {
-      setMessage("Preencha todos os campos!");
+  async function createSubject() {
+    if (!name) {
+      setMessage("Preencha o nome da matéria!");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch("/api/classes", {
+      const res = await fetch("/api/subjects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, year: parseInt(year) }),
+        body: JSON.stringify({ name }),
       });
 
       if (res.ok) {
-        setMessage("Turma criada com sucesso!");
+        setMessage("Matéria criada com sucesso!");
         setName("");
-        setYear("");
-        loadClasses();
+        loadSubjects();
       } else {
         const err = await res.json();
-        setMessage(`Erro: ${err.error || "Não foi possível criar"}`);
+        setMessage(`Erro: ${err.error}`);
       }
     } catch (err) {
       setMessage("Erro de rede");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   }
 
-  async function updateClass(id: number) {
-    if (!editName || !editYear) {
-      setMessage("Preencha todos os campos!");
+  async function updateSubject(id: number) {
+    if (!editName) {
+      setMessage("Preencha o nome da matéria!");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/classes/${id}`, {
+      const res = await fetch(`/api/subjects/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: editName, year: parseInt(editYear) }),
+        body: JSON.stringify({ name: editName }),
       });
 
       if (res.ok) {
-        setMessage("Turma atualizada com sucesso!");
+        setMessage("Matéria atualizada com sucesso!");
         setEditingId(null);
-        loadClasses();
+        loadSubjects();
       } else {
         const err = await res.json();
-        setMessage(`Erro: ${err.error || "Não foi possível atualizar"}`);
+        setMessage(`Erro: ${err.error}`);
       }
     } catch (err) {
       setMessage("Erro de rede");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   }
 
-  async function deleteClass(id: number) {
+  async function deleteSubject(id: number) {
     setLoading(true);
     try {
-      const res = await fetch(`/api/classes/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/subjects/${id}`, { method: "DELETE" });
 
       if (res.ok) {
-        setMessage("Turma removida com sucesso!");
-        loadClasses();
+        setMessage("Matéria removida com sucesso!");
+        loadSubjects();
         setDeleteConfirm(null);
       } else {
         const err = await res.json();
-        setMessage(`Erro: ${err.error || "Não foi possível remover"}`);
+        setMessage(`Erro: ${err.error}`);
       }
     } catch (err) {
       setMessage("Erro de rede");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   }
 
-  function startEdit(cls: Class) {
-    setEditingId(cls.id);
-    setEditName(cls.name);
-    setEditYear(cls.year.toString());
+  function startEdit(subject: Subject) {
+    setEditingId(subject.id);
+    setEditName(subject.name);
   }
 
   function cancelEdit() {
     setEditingId(null);
     setEditName("");
-    setEditYear("");
   }
 
   useEffect(() => {
-    loadClasses();
+    loadSubjects();
   }, []);
 
   return (
-    <div className="p-10">
+    <div className="p-10 pt-24">
       <HeaderGestor />
-      <h1 className="text-3xl font-bold mb-6">Gerenciar Turmas</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Gerenciar Matérias</h1>
+        <Link href="/manager" className="text-blue-400 hover:underline">← Voltar</Link>
+      </div>
 
       {message && (
         <div className={`p-4 mb-4 rounded ${message.includes("sucesso") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
@@ -137,25 +139,18 @@ export default function ClassesPage() {
       )}
 
       <div className="bg-gray-800 p-6 rounded-lg mb-6">
-        <h2 className="text-xl font-semibold text-white mb-4">Criar Nova Turma</h2>
+        <h2 className="text-xl font-semibold text-white mb-4">Criar Nova Matéria</h2>
         <div className="flex gap-3">
           <input
+            type="text"
+            placeholder="Nome da matéria"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Nome da turma (ex: 1º A)"
             className="flex-1 p-2 border rounded bg-gray-700 text-white"
             disabled={loading}
           />
-          <input
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            placeholder="Ano"
-            type="number"
-            className="w-20 p-2 border rounded bg-gray-700 text-white"
-            disabled={loading}
-          />
           <button
-            onClick={createClass}
+            onClick={createSubject}
             disabled={loading}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60"
           >
@@ -170,43 +165,34 @@ export default function ClassesPage() {
             <tr className="bg-zinc-900 text-white">
               <th className="p-3">ID</th>
               <th className="p-3">Nome</th>
-              <th className="p-3">Ano</th>
               <th className="p-3">Ações</th>
             </tr>
           </thead>
           <tbody>
-            {classesList.length === 0 ? (
+            {subjects.length === 0 ? (
               <tr>
-                <td colSpan={4} className="p-4 text-center text-gray-400">
-                  Nenhuma turma encontrada
+                <td colSpan={3} className="p-4 text-center text-gray-400">
+                  Nenhuma matéria encontrada
                 </td>
               </tr>
             ) : (
-              classesList.map((cls) => (
-                <tr key={cls.id} className="border-b border-gray-600 hover:bg-gray-800">
-                  <td className="p-3">{cls.id}</td>
-                  {editingId === cls.id ? (
+              subjects.map((subject) => (
+                <tr key={subject.id} className="border-b border-gray-600 hover:bg-gray-800">
+                  <td className="p-3">{subject.id}</td>
+                  {editingId === subject.id ? (
                     <>
                       <td className="p-3">
                         <input
+                          type="text"
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
                           className="w-full p-1 border rounded bg-gray-700 text-white"
                           disabled={loading}
                         />
                       </td>
-                      <td className="p-3">
-                        <input
-                          value={editYear}
-                          onChange={(e) => setEditYear(e.target.value)}
-                          type="number"
-                          className="w-full p-1 border rounded bg-gray-700 text-white"
-                          disabled={loading}
-                        />
-                      </td>
                       <td className="p-3 flex gap-2">
                         <button
-                          onClick={() => updateClass(cls.id)}
+                          onClick={() => updateSubject(subject.id)}
                           disabled={loading}
                           className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-60"
                         >
@@ -222,19 +208,18 @@ export default function ClassesPage() {
                     </>
                   ) : (
                     <>
-                      <td className="p-3">{cls.name}</td>
-                      <td className="p-3">{cls.year}</td>
+                      <td className="p-3">{subject.name}</td>
                       <td className="p-3 flex gap-2">
                         <button
-                          onClick={() => startEdit(cls)}
+                          onClick={() => startEdit(subject)}
                           className="px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700"
                         >
                           Editar
                         </button>
-                        {deleteConfirm === cls.id ? (
+                        {deleteConfirm === subject.id ? (
                           <div className="flex gap-2">
                             <button
-                              onClick={() => deleteClass(cls.id)}
+                              onClick={() => deleteSubject(subject.id)}
                               disabled={loading}
                               className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-60"
                             >
@@ -249,7 +234,7 @@ export default function ClassesPage() {
                           </div>
                         ) : (
                           <button
-                            onClick={() => setDeleteConfirm(cls.id)}
+                            onClick={() => setDeleteConfirm(subject.id)}
                             className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
                           >
                             Deletar

@@ -19,8 +19,8 @@ export async function GET() {
         tsc.class_id
       FROM teacher_subject_class tsc
       JOIN users u ON u.id = tsc.teacher_id
-      JOIN subjects sub ON sub.id = tsc.subject_id
-      JOIN classes c ON c.id = tsc.class_id
+      LEFT JOIN subjects sub ON sub.id = tsc.subject_id
+      LEFT JOIN classes c ON c.id = tsc.class_id
       ORDER BY c.name, sub.name
     `);
 
@@ -36,10 +36,52 @@ export async function GET() {
  *
  * Regras:
  * - uma matéria NÃO pode se repetir na mesma turma
+ * - teacher_id deve estar na tabela teachers
  */
 export async function POST(req: Request) {
   try {
     const { teacher_id, subject_id, class_id } = await req.json();
+
+    console.log("📤 POST /api/teacherSubjectClass:", { teacher_id, subject_id, class_id });
+
+    // Verifica se o professor existe
+    const [teacher]: any = await db.query(
+      "SELECT * FROM teachers WHERE user_id = ?",
+      [teacher_id]
+    );
+
+    if (teacher.length === 0) {
+      return NextResponse.json(
+        { error: "Professor não encontrado" },
+        { status: 400 }
+      );
+    }
+
+    // Verifica se a matéria existe
+    const [subject]: any = await db.query(
+      "SELECT * FROM subjects WHERE id = ?",
+      [subject_id]
+    );
+
+    if (subject.length === 0) {
+      return NextResponse.json(
+        { error: "Matéria não encontrada" },
+        { status: 400 }
+      );
+    }
+
+    // Verifica se a turma existe
+    const [cls]: any = await db.query(
+      "SELECT * FROM classes WHERE id = ?",
+      [class_id]
+    );
+
+    if (cls.length === 0) {
+      return NextResponse.json(
+        { error: "Turma não encontrada" },
+        { status: 400 }
+      );
+    }
 
     // Verifica duplicidade (matéria repetida na turma)
     const [dup]: any = await db.query(
@@ -60,11 +102,14 @@ export async function POST(req: Request) {
       [teacher_id, subject_id, class_id]
     );
 
+    console.log("✅ Atribuição criada com sucesso");
+
     return NextResponse.json({
       success: true,
       message: "Professor atribuído com sucesso",
     });
   } catch (e: any) {
+    console.error("❌ Erro POST teacherSubjectClass:", e);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

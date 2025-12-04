@@ -1,4 +1,4 @@
-import { HeaderAluno } from "@/src/components/header";
+import { HeaderAluno } from "@/components/header";
 
 export default function ReportPage() {
   const boletim = [
@@ -17,7 +17,7 @@ export default function ReportPage() {
 
       <table className="mt-8 w-full border-collapse">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-blue-400">
             <th className="p-3 border">Matéria</th>
             <th className="p-3 border">Média Final</th>
           </tr>

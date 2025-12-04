@@ -4,9 +4,7 @@ import { db } from "@/lib/db";
 
 /**
  * GET /api/teachers
- * Lista todos os professores com:
- * - dados do usuário
- * - matérias e turmas que lecionam (se existirem)
+ * Lista todos os professores
  */
 export async function GET() {
   try {
@@ -15,22 +13,9 @@ export async function GET() {
         u.id AS teacher_id,
         u.name,
         u.email,
-        t.degree,
-        t.experience,
-        JSON_ARRAYAGG(
-          JSON_OBJECT(
-            'subject', s.name,
-            'subject_id', s.id,
-            'class_id', c.id,
-            'class_name', c.name
-          )
-        ) AS assignments
+        t.specialization
       FROM users u
       JOIN teachers t ON u.id = t.user_id
-      LEFT JOIN teacher_subject_class tsc ON t.user_id = tsc.teacher_id
-      LEFT JOIN subjects s ON s.id = tsc.subject_id
-      LEFT JOIN classes c ON c.id = tsc.class_id
-      GROUP BY u.id
       ORDER BY u.name
     `);
 
@@ -42,39 +27,36 @@ export async function GET() {
 
 /**
  * POST /api/teachers
- * Cria um professor no sistema.
- *
- * Body:
- * {
- *   name,
- *   email,
- *   password,
- *   degree,
- *   experience
- * }
+ * Cria um professor no sistema (já usa POST /api/users com role=teacher)
  */
 export async function POST(req: Request) {
   try {
-    const { name, email, password, degree = null, experience = null } =
-      await req.json();
+    const { name, email, password, specialization = null } = await req.json();
 
-    // 1) Criar usuário
-    const [result]: any = await db.query(
-      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'teacher')",
-      [name, email, password]
-    );
+    // Criar via /api/users
+    const res = await fetch("http://localhost:3000/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password, role: "teacher" }),
+    });
 
-    const teacherId = result.insertId;
+    const data = await res.json();
 
-    // 2) Inserir dados de teacher
-    await db.query(
-      "INSERT INTO teachers (user_id, degree, experience) VALUES (?, ?, ?)",
-      [teacherId, degree, experience]
-    );
+    if (!res.ok) {
+      return NextResponse.json(data, { status: res.status });
+    }
+
+    // Atualizar especialização se fornecida
+    if (specialization) {
+      await db.query(
+        "UPDATE teachers SET specialization = ? WHERE user_id = ?",
+        [specialization, data.userId]
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      teacherId,
+      teacherId: data.userId,
       message: "Professor criado com sucesso",
     });
   } catch (e: any) {

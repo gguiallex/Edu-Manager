@@ -6,11 +6,13 @@ import { db } from "@/lib/db";
  * GET /api/teacherSubjectClass/:id
  * Retorna vínculo professor ↔ matéria ↔ turma
  */
-export async function GET(_: any, { params }: any) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
+    
     const [row]: any = await db.query(
       "SELECT * FROM teacher_subject_class WHERE id = ?",
-      [params.id]
+      [id]
     );
 
     return NextResponse.json(row[0] ?? null);
@@ -23,17 +25,14 @@ export async function GET(_: any, { params }: any) {
  * PUT /api/teacherSubjectClass/:id
  * Atualiza vínculo (trocar professor, matéria ou turma)
  */
-export async function PUT(req: Request, { params }: any) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { teacher_id, subject_id, class_id } = await req.json();
+    const { id } = await params;
+    const { teacher_id, subject_id, class_id } = await request.json();
 
     await db.query(
-      `
-      UPDATE teacher_subject_class
-      SET teacher_id = ?, subject_id = ?, class_id = ?
-      WHERE id = ?
-      `,
-      [teacher_id, subject_id, class_id, params.id]
+      "UPDATE teacher_subject_class SET teacher_id = ?, subject_id = ?, class_id = ? WHERE id = ?",
+      [teacher_id, subject_id, class_id, id]
     );
 
     return NextResponse.json({
@@ -49,17 +48,17 @@ export async function PUT(req: Request, { params }: any) {
  * DELETE /api/teacherSubjectClass/:id
  * Remove vínculo professor ↔ matéria ↔ turma
  */
-export async function DELETE(_: any, { params }: any) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await db.query("DELETE FROM teacher_subject_class WHERE id = ?", [
-      params.id,
-    ]);
-
-    return NextResponse.json({
-      success: true,
-      message: "Vínculo removido com sucesso",
-    });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    const { id } = await params;
+    
+    console.log(`🗑️ DELETE /api/teacherSubjectClass/${id}`);
+    
+    await db.query("DELETE FROM teacher_subject_class WHERE id = ?", [id]);
+    
+    return NextResponse.json({ message: "Atribuição removida com sucesso" });
+  } catch (err: any) {
+    console.error("❌ Erro DELETE teacherSubjectClass:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

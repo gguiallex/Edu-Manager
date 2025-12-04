@@ -4,12 +4,6 @@ import { db } from "@/lib/db";
 
 /**
  * GET /api/students
- * Retorna a lista de todos os alunos com dados básicos:
- * - user.id, name, email
- * - dados da tabela students (responsible, responsible_phone)
- * - turma (se existir): class_id e class_name
- *
- * JOIN usado: users -> students -> student_class -> classes
  */
 export async function GET() {
   try {
@@ -25,7 +19,7 @@ export async function GET() {
         c.year AS class_year
       FROM users u
       JOIN students s ON u.id = s.user_id
-      LEFT JOIN student_class sc ON s.user_id = sc.student_id
+      LEFT JOIN student_class sc ON u.id = sc.student_id
       LEFT JOIN classes c ON sc.class_id = c.id
       ORDER BY u.name
     `);
@@ -37,20 +31,7 @@ export async function GET() {
 
 /**
  * POST /api/students
- * Cria um novo usuário com role = 'student', cria o registro na tabela students,
- * e opcionalmente vincula o aluno a uma turma (class_id).
- *
- * Body esperado (JSON):
- * {
- *   name: string,
- *   email: string,
- *   password: string,
- *   responsible?: string,
- *   responsible_phone?: string,
- *   class_id?: number   // opcional: já vincula o aluno à turma
- * }
- *
- * Retorna: { success: true, userId }
+ * Cria aluno ou vincula a turma
  */
 export async function POST(req: Request) {
   try {
@@ -61,25 +42,27 @@ export async function POST(req: Request) {
       responsible = null,
       responsible_phone = null,
       class_id = null,
+      user_id = null,
     } = await req.json();
 
-    // Cria usuário com role student
-    const [result]: any = await db.query(
-      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'student')",
-      [name, email, password]
-    );
+    let userId = user_id;
 
-    const userId = (result as any).insertId;
+    // Se não forneceu user_id, cria novo usuário
+    if (!userId) {
+      const [result]: any = await db.query(
+        "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'student')",
+        [name, email, password]
+      );
+      userId = result.insertId;
 
-    // Insere dados específicos de student
-    await db.query(
-      "INSERT INTO students (user_id, responsible, responsible_phone) VALUES (?, ?, ?)",
-      [userId, responsible, responsible_phone]
-    );
+      await db.query(
+        "INSERT INTO students (user_id, responsible, responsible_phone) VALUES (?, ?, ?)",
+        [userId, responsible, responsible_phone]
+      );
+    }
 
-    // Se class_id fornecido, vincula (se já existir vínculo, substitui)
+    // Vincular turma se fornecida
     if (class_id) {
-      // Remove vínculo anterior (se houver) e insere o novo (student pode ter apenas 1 turma)
       await db.query("DELETE FROM student_class WHERE student_id = ?", [userId]);
       await db.query("INSERT INTO student_class (student_id, class_id) VALUES (?, ?)", [
         userId,

@@ -1,4 +1,4 @@
-import { HeaderAluno } from "@/src/components/header";
+import { HeaderAluno } from "@/components/header";
 import Link from "next/link";
 
 export default function SubjectsPage() {
